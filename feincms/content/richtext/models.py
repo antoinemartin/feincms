@@ -61,7 +61,11 @@ class RichTextContent(models.Model):
     form = RichTextContentAdminForm
     feincms_item_editor_form = RichTextContentAdminForm
 
-    feincms_item_editor_context_processors = ( lambda x: dict(TINYMCE_JS_URL = settings.TINYMCE_JS_URL), )
+    feincms_item_editor_context_processors = (
+        lambda x: dict(TINYMCE_JS_URL = settings.TINYMCE_JS_URL),
+        lambda x: dict(TINYMCE_CONTENT_CSS_URL = settings.TINYMCE_CONTENT_CSS_URL),
+        lambda x: dict(TINYMCE_LINK_LIST_URL = settings.TINYMCE_LINK_LIST_URL),
+    )
     feincms_item_editor_includes = {
         'head': [ settings.TINYMCE_CONFIG_URL ],
         }
@@ -79,7 +83,7 @@ class RichTextContent(models.Model):
     def save(self, *args, **kwargs):
         # TODO: Move this to the form?
         if getattr(self, 'cleanse', False):
-            from feincms.utils.cleanse import cleanse_html
+            from feincms.utils.html.cleanse import cleanse_html
             self.text = cleanse_html(self.text)
         super(RichTextContent, self).save(*args, **kwargs)
 
