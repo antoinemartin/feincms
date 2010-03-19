@@ -192,6 +192,14 @@ class ItemEditor(admin.ModelAdmin):
             for version in revision.version_set.all().select_related("content_type"):
                 if version.object_version.object == obj:
                     FORM_DATA.update(version.field_dict)
+                    # split date fields
+                    date_fields = filter( lambda x : x.endswith('_date'), version.field_dict.keys())
+                    if (date_fields):
+                        for date_field in date_fields:
+                            value = version.field_dict[date_field]
+                            if value:
+                                FORM_DATA['%s_0' % date_field ] =  value.strftime('%Y-%m-%d')
+                                FORM_DATA['%s_1' % date_field ] =  value.strftime('%H:%M:%S')
                     continue
 
                 version_prefix = "%s-%s" % (
@@ -211,6 +219,7 @@ class ItemEditor(admin.ModelAdmin):
 
             for k, v in total_forms.items():
                 FORM_DATA["%s-INITIAL_FORMS" % k] = v
+                FORM_DATA["%s-MAX_NUM_FORMS" % k] = 0                
                 # TOTAL FORMS should be one for each actual object and one for
                 # the "Add new" feature. We'll bump the total up if we actually
                 # have existing content:
